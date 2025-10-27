@@ -9,6 +9,22 @@ def get_db_connection():
     return conn
 @app.route('/tasks', methods=['GET'])
 def get_tasks():
+    completed = request.args.get('completed')
+    if completed:
+        conn = get_db_connection()
+        tasks = conn.execute('SELECT * FROM tasks WHERE completed = ?', (completed == '1',)).fetchall()
+        conn.close()
+        tasks_list = []
+        for task in tasks:
+            tasks_list.append({
+                'id':task['id'],
+                'title':task['title'],
+                'description':task['description'],
+                'completed': bool(task['completed']),
+                'created':task['created']
+            })
+        return jsonify(tasks_list)
+    # If no completed query parameter is provided, return all tasks
     conn = get_db_connection()
     tasks = conn.execute('SELECT * FROM tasks').fetchall()
     conn.close()
