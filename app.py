@@ -54,6 +54,21 @@ def create_task():
     conn.close()
     return jsonify({'id': task_id, 'title': title, 'description': description, 'completed': 0}), 201
 
+@app.route('/tasks/<int:task_id>', methods=['PUT'])
+def update_task(task_id):
+    updated_task = request.get_json()
+    title = updated_task.get('title')
+    description = updated_task.get('description')
+    completed = updated_task.get('completed')
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('UPDATE tasks SET title = ?, description = ?, completed = ? WHERE id = ?',
+                   (title, description, int(completed), task_id))
+    conn.commit()
+    conn.close()
+    if cursor.rowcount == 0:
+        return jsonify({'error': 'Task not found'}), 404
+    return jsonify({'id': task_id, 'title': title, 'description': description, 'completed': completed})
 
 
 
