@@ -70,6 +70,16 @@ def update_task(task_id):
         return jsonify({'error': 'Task not found'}), 404
     return jsonify({'id': task_id, 'title': title, 'description': description, 'completed': completed})
 
+@app.route('/tasks/<int:task_id>', methods=['DELETE'])
+def delete_task(task_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM tasks WHERE id = ?', (task_id,))
+    conn.commit()
+    conn.close()
+    if cursor.rowcount == 0:
+        return jsonify({'error': 'Task not found'}), 404
+    return jsonify({'message': 'Task deleted successfully'})
 
 
 if __name__ == '__main__':
