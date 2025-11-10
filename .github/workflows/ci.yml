@@ -72,21 +72,20 @@ jobs:
           ENDSSH
 
       - name: Health check
-  env:
-    EC2_HOST: ${{ secrets.EC2_HOST }}
-  run: |
-    echo "Waiting for application to start..."
-    sleep 10
-    HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://$EC2_HOST:5000/tasks || echo "000")
-    if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "302" ]; then
-      echo "✅ Application is healthy! HTTP $HTTP_CODE"
-    else
-      echo "❌ Application may not be responding properly. HTTP $HTTP_CODE"
-      echo "---- Flask Logs ----"
-      ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "tail -n 20 ~/todos-deploy/app.log"
-      exit 1
-    fi
-
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+        run: |
+          echo "Waiting for application to start..."
+          sleep 10
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://$EC2_HOST:5000/tasks || echo "000")
+          if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "302" ]; then
+            echo "✅ Application is healthy! HTTP $HTTP_CODE"
+          else
+            echo "❌ Application may not be responding properly. HTTP $HTTP_CODE"
+            echo "---- Flask Logs ----"
+            ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "tail -n 20 ~/todos-deploy/app.log"
+            exit 1
+          fi
 
       - name: Clean up SSH key
         if: always()
